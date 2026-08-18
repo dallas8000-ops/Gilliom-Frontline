@@ -1,0 +1,1 @@
+"""Gilliom FrontLine Django project."""

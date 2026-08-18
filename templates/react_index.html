@@ -1,0 +1,16 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0f1419">
+  <title>Gilliom FrontLine — Incident Command</title>
+  <link rel="stylesheet" href="{% static 'frontend/assets/app.css' %}?v=react5">
+</head>
+<body>
+  <div id="app-root" data-username="{{ username }}"></div>
+  <div id="root"></div>
+  <script type="module" src="{% static 'frontend/assets/app.js' %}?v=react5"></script>
+</body>
+</html>
