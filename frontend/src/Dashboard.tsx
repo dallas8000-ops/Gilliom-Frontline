@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -23,19 +23,12 @@ import {
   X,
 } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
 import { z } from "zod";
 import { api, csrfToken } from "./api";
 import type { Incident, IncidentInput } from "./types";
 import "./dashboard.css";
+
+const SeverityChart = lazy(() => import("./SeverityChart"));
 
 const schema = z.object({
   title: z.string().min(4, "Use at least 4 characters").max(255),
@@ -352,31 +345,9 @@ export default function Dashboard() {
               <BarChart3 />
             </div>
             <div className="chart">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={severityData}
-                  layout="vertical"
-                  margin={{ left: 0, right: 18 }}
-                >
-                  <CartesianGrid stroke="#2a343e" horizontal={false} />
-                  <XAxis type="number" hide />
-                  <YAxis
-                    type="category"
-                    dataKey="severity"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: "#a9a192", fontSize: 11 }}
-                  />
-                  <Tooltip
-                    cursor={{ fill: "#212a33" }}
-                    contentStyle={{
-                      background: "#161d24",
-                      border: "1px solid #2a343e",
-                    }}
-                  />
-                  <Bar dataKey="count" fill="#e8a33d" radius={[0, 3, 3, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+              <Suspense fallback={<div className="chart-loading">Loading chart...</div>}>
+                <SeverityChart data={severityData} />
+              </Suspense>
             </div>
             <div className="health-note">
               <CheckCircle2 />
@@ -404,12 +375,14 @@ function IncidentComposer({
   onClose,
 }: Readonly<{ open: boolean; onClose: () => void }>) {
   const queryClient = useQueryClient();
+  const [rawText, setRawText] = useState("");
   const {
     register,
     handleSubmit,
     control,
     reset,
     setFocus,
+    setValue,
     formState: { errors },
   } = useForm<IncidentInput>({
     resolver: zodResolver(schema),
@@ -423,15 +396,32 @@ function IncidentComposer({
         ...items,
       ]);
       reset();
+      setRawText("");
+      intakeMutation.reset();
       onClose();
+    },
+  });
+  const intakeMutation = useMutation({
+    mutationFn: api.parseIntake,
+    onSuccess: (parsed) => {
+      setValue("title", parsed.title, { shouldValidate: true });
+      setValue("location", parsed.location, { shouldValidate: true });
+      setValue("category", parsed.category, { shouldValidate: true });
+      setValue("severity", parsed.severity, { shouldValidate: true });
+      setValue("description", parsed.description, { shouldValidate: true });
     },
   });
   useEffect(() => {
     if (open) setFocus("title");
   }, [open, setFocus]);
+  const handleClose = () => {
+    setRawText("");
+    intakeMutation.reset();
+    onClose();
+  };
   return (
     <>
-      <button type="button" aria-label="Close incident form" className={`backdrop ${open ? "show" : ""}`} onClick={onClose} />
+      <button type="button" aria-label="Close incident form" className={`backdrop ${open ? "show" : ""}`} onClick={handleClose} />
       <aside className={`composer ${open ? "show" : ""}`} aria-hidden={!open}>
         <div className="drawer-head">
           <div>
@@ -439,9 +429,33 @@ function IncidentComposer({
             <h2>File an incident</h2>
             <p>Create a traceable operational record.</p>
           </div>
-          <button type="button" className="icon-button" onClick={onClose}>
+          <button type="button" className="icon-button" onClick={handleClose}>
             <X />
           </button>
+        </div>
+        <div className="ai-intake">
+          <label>
+            <span>AI intake</span>
+            <textarea
+              value={rawText}
+              onChange={(event) => setRawText(event.target.value)}
+              placeholder="Paste a raw field report and AI will fill the form below for you to review"
+            />
+          </label>
+          <button
+            type="button"
+            className="secondary-button"
+            disabled={!rawText.trim() || intakeMutation.isPending}
+            onClick={() => intakeMutation.mutate(rawText.trim())}
+          >
+            {intakeMutation.isPending ? "Parsing..." : "Fill form with AI"}
+          </button>
+          {intakeMutation.error && (
+            <div className="form-error">{intakeMutation.error.message}</div>
+          )}
+          {intakeMutation.isSuccess && (
+            <div className="form-hint">Form filled below — review before filing.</div>
+          )}
         </div>
         <form onSubmit={handleSubmit((values) => mutation.mutate(values))}>
           <label>

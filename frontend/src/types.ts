@@ -28,3 +28,11 @@ export interface IncidentInput {
   severity: Severity
   description: string
 }
+
+export interface ParsedIntake {
+  title: string
+  location: string
+  category: string
+  severity: Severity
+  description: string
+}

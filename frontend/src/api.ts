@@ -1,4 +1,4 @@
-import type { Incident, IncidentInput, IncidentStatus } from './types'
+import type { Incident, IncidentInput, IncidentStatus, ParsedIntake } from './types'
 
 export function csrfToken(): string {
   const value = document.cookie
@@ -38,4 +38,7 @@ export const api = {
     `/api/incidents/${encodeURIComponent(caseId)}/status/`,
     { method: 'PATCH', body: JSON.stringify({ status }) },
   ),
+  parseIntake: (rawText: string) => request<ParsedIntake>('/api/parse/', {
+    method: 'POST', body: JSON.stringify({ rawText }),
+  }),
 }

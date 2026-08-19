@@ -1,9 +1,21 @@
 {
+  "src/SeverityChart.tsx": {
+    "file": "assets/SeverityChart-C4-1ZVrD.js",
+    "name": "SeverityChart",
+    "src": "src/SeverityChart.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "src/main.tsx"
+    ]
+  },
   "src/main.tsx": {
     "file": "assets/app.js",
     "name": "main",
     "src": "src/main.tsx",
     "isEntry": true,
+    "dynamicImports": [
+      "src/SeverityChart.tsx"
+    ],
     "css": [
       "assets/app.css"
     ]

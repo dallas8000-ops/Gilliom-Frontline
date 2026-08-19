@@ -393,6 +393,14 @@ tbody tr:hover {
   height: 210px;
   padding: 18px 6px;
 }
+.chart-loading {
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  font: 10px var(--mono);
+  text-transform: uppercase;
+}
 .health-note {
   border-top: 1px solid var(--line);
   padding: 16px;
@@ -470,6 +478,13 @@ tbody tr:hover {
   display: grid;
   gap: 8px;
 }
+.ai-intake {
+  display: grid;
+  gap: 8px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 18px;
+  padding-bottom: 18px;
+}
 .composer label,
 .composer legend {
   display: grid;
@@ -512,9 +527,24 @@ tbody tr:hover {
   background: var(--red);
   color: white;
 }
+.secondary-button {
+  min-height: 38px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: #ede7da;
+  font-weight: 700;
+}
+.secondary-button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
 .composer small,
 .form-error {
   color: var(--red);
+  font-size: 10px;
+}
+.form-hint {
+  color: var(--green);
   font-size: 10px;
 }
 .composer .submit {

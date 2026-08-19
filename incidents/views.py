@@ -91,6 +91,8 @@ def set_status(request, case_id):
     new_status = request.data.get('status')
     if new_status not in ('open', 'closed'):
         return Response({'error': 'Invalid status'}, status=400)
+    if new_status == incident.status:
+        return Response({'error': f'Case is already {new_status}'}, status=400)
 
     incident.status = new_status
     incident.save(update_fields=['status'])
