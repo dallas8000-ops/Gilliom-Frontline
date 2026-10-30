@@ -8,6 +8,17 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+
+sentry_sdk.init(
+    dsn=os.environ.get("SENTRY_DSN", ""),
+    integrations=[DjangoIntegration()],
+    traces_sample_rate=0.1,     # perf monitoring sample rate
+    send_default_pii=False,     # don't leak user PII into Sentry — matches your security posture
+    environment=os.environ.get("SENTRY_ENVIRONMENT", "production"),
+)
+
 SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-only-insecure-key-change-in-production')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
